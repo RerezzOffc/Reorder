@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layar Recorder dengan Resolusi 200p, 8K & Audio Kualitas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #5C6BC0, #3F51B5);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+            background-size: cover;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            animation: slideUp 0.6s ease-out forwards;
+            overflow-y: auto;
+            max-height: 90vh;
+            border-left: 5px solid #0288D1;
+            border-top: 5px solid #0288D1;
+        }
+
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #3F51B5;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .description {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #444;
+            max-width: 800px;
+            margin: 0 auto 25px auto;
+        }
+
+        label {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #333;
+            display: block;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 2px solid #3F51B5;
+            border-radius: 8px;
+            background-color: #f4f6f9;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        select:focus {
+            border-color: #0288D1;
+            box-shadow: 0 0 8px rgba(2, 136, 209, 0.5);
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            background-color: #3F51B5;
+            color: white;
+            cursor: pointer;
+            width: 48%;
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        button:hover:enabled {
+            background-color: #0288D1;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        #video {
+            margin-top: 25px;
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            border: 4px solid #0288D1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .controls button {
+            background-color: #66BB6A;
+            padding: 12px 20px;
+            border-radius: 50px;
+        }
+
+        .controls button:hover {
+            background-color: #43A047;
+        }
+
+        .history {
+            margin-top: 30px;
+            text-align: left;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .history h2 {
+            font-size: 1.8rem;
+            color: #3F51B5;
+            margin-bottom: 15px;
+        }
+
+        .history ul {
+            list-style-type: none;
+        }
+
+        .history ul li {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #333;
+        }
+
+        .history a {
+            color: #0288D1;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .history a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .footer a {
+            color: #3F51B5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px 20px;
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .buttons-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            #video {
+                height: 300px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .history ul li {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .description {
+                font-size: 1rem;
+            }
+
+            .buttons-container button {
+                padding: 12px 18px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Layar Recorder dengan Resolusi 200p, 8K & Audio Kualitas</h1>
+        <p class="description">Rekam layar Anda dengan kualitas 200p, 8K, dan 10K, pilih sumber suara dan resolusi yang diinginkan. Anda juga bisa mengedit video setelah perekaman.</p>
+
+        <!-- Pilihan resolusi dan sumber suara -->
+        <label for="resolution">Pilih Resolusi:</label>
+        <select id="resolution">
+            <option value="10240x5760">10240x5760 (10K)</option>
+            <option value="7680x4320">7680x4320 (8K)</option>
+            <option value="3840x2160">3840x2160 (4K)</option>
+            <option value="1920x1080">1920x1080 (HD)</option>
+            <option value="1280x720">1280x720 (HD)</option>
+            <option value="640x480">640x480 (SD)</option>
+            <option value="320x200">320x200 (200p)</option>
+        </select>
+
+        <label for="audioSource">Pilih Sumber Audio:</label>
+        <select id="audioSource">
+            <option value="none">Tanpa Suara</option>
+            <option value="microphone">Mikrofon</option>
+            <option value="device">Audio Perangkat</option>
+            <option value="both">Mikrofon dan Audio Perangkat</option>
+        </select>
+
+        <label for="audioQuality">Pilih Kualitas Audio:</label>
+        <select id="audioQuality">
+            <option value="256000">256kbps</option>
+            <option value="128000">128kbps</option>
+            <option value="64000">64kbps</option>
+        </select>
+
+        <label for="screenSource">Pilih Sumber Rekaman:</label>
+        <select id="screenSource">
+            <option value="screen">Rekam Seluruh Layar</option>
+            <option value="window">Rekam Jendela Aplikasi</option>
+            <option value="camera">Rekam Kamera</option>
+        </select>
+
+        <!-- Tombol Perekaman -->
+        <div class="buttons-container">
+            <button id="startBtn">Mulai Rekam</button>
+            <button id="stopBtn" disabled>Berhenti Rekam</button>
+            <button id="trimBtn" disabled>Pemotongan Video</button>
+            <button id="speedBtn" disabled>Percepatan/Perlambatan</button>
+        </div>
+
+        <!-- Video Output -->
+        <video id="video" controls></video>
+
+        <!-- Riwayat Rekaman -->
+        <div class="history">
+            <h2>Riwayat Rekaman</h2>
+            <ul id="historyList"></ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Layar Recorder | <a href="#">Kebijakan Privasi</a> | <a href="#">Kontak</a></p>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let videoElement = document.getElementById('video');
+        let startBtn = document.getElementById('startBtn');
+        let stopBtn = document.getElementById('stopBtn');
+        let trimBtn = document.getElementById('trimBtn');
+        let speedBtn = document.getElementById('speedBtn');
+        let historyList = document.getElementById('historyList');
+
+        startBtn.onclick = startRecording;
+        stopBtn.onclick = stopRecording;
+
+        async function startRecording() {
+            let resolution = document.getElementById('resolution').value;
+            let audioSource = document.getElementById('audioSource').value;
+            let screenSource = document.getElementById('screenSource').value;
+            let audioQuality = document.getElementById('audioQuality').value;
+            let constraints = {};
+
+            try {
+                if (screenSource === "screen") {
+                    constraints = {
+                        video: { width: { exact: resolution.split('x')[0] }, height: { exact: resolution.split('x')[1] } },
+                        audio: audioSource !== 'none' ? { deviceId: audioSource === 'microphone' ? { exact: 'microphone' } : {} } : false
+                    };
+                } else if (screenSource === "window") {
+                    constraints = {
+                        video: { mediaSource: 'window', width: { exact: resolution.split('x')[0] }, height: { exact: resolution.split('x')[1] } },
+                        audio: audioSource !== 'none' ? { deviceId: audioSource === 'microphone' ? { exact: 'microphone' } : {} } : false
+                    };
+                } else if (screenSource === "camera") {
+                    constraints = {
+                        video: { facingMode: 'user' },
+                        audio: audioSource !== 'none' ? { deviceId: audioSource === 'microphone' ? { exact: 'microphone' } : {} } : false
+                    };
+                }
+
+                let stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm; codecs=vp8',
+                    videoBitsPerSecond: 10000000,
+                    audioBitsPerSecond: parseInt(audioQuality)
+                });
+
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = handleStop;
+                mediaRecorder.start();
+
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                trimBtn.disabled = false;
+                speedBtn.disabled = false;
+            } catch (err) {
+                console.error("Error during screen recording: ", err);
+                alert("Gagal memulai perekaman.");
+            }
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            let stream = videoElement.srcObject;
+            let tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+
+        function handleDataAvailable(event) {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        }
+
+        function handleStop() {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            videoElement.src = url;
+
+            const listItem = document.createElement('li');
+            const timestamp = new Date().toLocaleString();
+            listItem.innerHTML = `<span>Rekaman pada ${timestamp}</span> <a href="${url}" download="rekaman-${timestamp}.webm">Unduh</a>`;
+            historyList.appendChild(listItem);
+
+            recordedChunks = [];
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+    </script>
+
+</body>
+</html>
