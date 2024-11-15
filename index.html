@@ -324,94 +324,88 @@
     </div>
 
     <script>
-        let mediaRecorder;
-        let recordedChunks = [];
-        let videoElement = document.getElementById('video');
-        let startBtn = document.getElementById('startBtn');
-        let stopBtn = document.getElementById('stopBtn');
-        let trimBtn = document.getElementById('trimBtn');
-        let speedBtn = document.getElementById('speedBtn');
-        let historyList = document.getElementById('historyList');
+    let mediaRecorder;
+    let recordedChunks = [];
+    let videoElement = document.getElementById('video');
+    let startBtn = document.getElementById('startBtn');
+    let stopBtn = document.getElementById('stopBtn');
+    let historyList = document.getElementById('historyList');
 
-        startBtn.onclick = startRecording;
-        stopBtn.onclick = stopRecording;
+    startBtn.onclick = startRecording;
+    stopBtn.onclick = stopRecording;
 
-        async function startRecording() {
-            let resolution = document.getElementById('resolution').value;
-            let audioSource = document.getElementById('audioSource').value;
-            let screenSource = document.getElementById('screenSource').value;
-            let audioQuality = document.getElementById('audioQuality').value;
-            let constraints = {};
+    async function startRecording() {
+        const resolution = document.getElementById('resolution').value.split('x');
+        const audioSource = document.getElementById('audioSource').value;
 
-            try {
-                if (screenSource === "screen") {
-                    constraints = {
-                        video: { width: { exact: resolution.split('x')[0] }, height: { exact: resolution.split('x')[1] } },
-                        audio: audioSource !== 'none' ? { deviceId: audioSource === 'microphone' ? { exact: 'microphone' } : {} } : false
-                    };
-                } else if (screenSource === "window") {
-                    constraints = {
-                        video: { mediaSource: 'window', width: { exact: resolution.split('x')[0] }, height: { exact: resolution.split('x')[1] } },
-                        audio: audioSource !== 'none' ? { deviceId: audioSource === 'microphone' ? { exact: 'microphone' } : {} } : false
-                    };
-                } else if (screenSource === "camera") {
-                    constraints = {
-                        video: { facingMode: 'user' },
-                        audio: audioSource !== 'none' ? { deviceId: audioSource === 'microphone' ? { exact: 'microphone' } : {} } : false
-                    };
-                }
+        try {
+            // Merekam layar
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { width: parseInt(resolution[0]), height: parseInt(resolution[1]) }
+            });
 
-                let stream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoElement.srcObject = stream;
-
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'video/webm; codecs=vp8',
-                    videoBitsPerSecond: 10000000,
-                    audioBitsPerSecond: parseInt(audioQuality)
+            // Merekam audio jika diperlukan
+            let audioStream = null;
+            if (audioSource !== "none") {
+                audioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: { deviceId: audioSource === 'microphone' ? undefined : {} }
                 });
-
-                mediaRecorder.ondataavailable = handleDataAvailable;
-                mediaRecorder.onstop = handleStop;
-                mediaRecorder.start();
-
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
-                trimBtn.disabled = false;
-                speedBtn.disabled = false;
-            } catch (err) {
-                console.error("Error during screen recording: ", err);
-                alert("Gagal memulai perekaman.");
             }
+
+            // Menggabungkan video dan audio (jika ada)
+            const combinedStream = new MediaStream([
+                ...screenStream.getVideoTracks(),
+                ...(audioStream ? audioStream.getAudioTracks() : [])
+            ]);
+
+            videoElement.srcObject = combinedStream;
+
+            // Memulai MediaRecorder
+            mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp8' });
+            mediaRecorder.ondataavailable = handleDataAvailable;
+            mediaRecorder.onstop = handleStop;
+            mediaRecorder.start();
+
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        } catch (error) {
+            console.error("Error starting recording:", error);
+            alert("Gagal memulai perekaman. Pastikan Anda memberikan izin akses layar dan audio.");
         }
+    }
 
-        function stopRecording() {
-            mediaRecorder.stop();
-            let stream = videoElement.srcObject;
-            let tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
+    function stopRecording() {
+        mediaRecorder.stop();
+
+        // Hentikan semua track pada stream
+        const stream = videoElement.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+    }
+
+    function handleDataAvailable(event) {
+        if (event.data.size > 0) {
+            recordedChunks.push(event.data);
         }
+    }
 
-        function handleDataAvailable(event) {
-            if (event.data.size > 0) {
-                recordedChunks.push(event.data);
-            }
-        }
+    function handleStop() {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        videoElement.src = url;
 
-        function handleStop() {
-            const blob = new Blob(recordedChunks, { type: 'video/webm' });
-            const url = URL.createObjectURL(blob);
-            videoElement.src = url;
+        const listItem = document.createElement('li');
+        const timestamp = new Date().toLocaleString();
+        listItem.innerHTML = `<span>Rekaman pada ${timestamp}</span> <a href="${url}" download="rekaman-${timestamp}.webm">Unduh</a>`;
+        historyList.appendChild(listItem);
 
-            const listItem = document.createElement('li');
-            const timestamp = new Date().toLocaleString();
-            listItem.innerHTML = `<span>Rekaman pada ${timestamp}</span> <a href="${url}" download="rekaman-${timestamp}.webm">Unduh</a>`;
-            historyList.appendChild(listItem);
+        recordedChunks = [];
+    }
+</script>
 
-            recordedChunks = [];
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-        }
-    </script>
 
 </body>
 </html>
